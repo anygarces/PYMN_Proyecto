@@ -7,6 +7,9 @@ import random
 
 random.seed(3939) #semilla
 
+x = 1000
+p_base = 0.2
+
 class Arbol(): #Definimos la clase Arbol
   def __init__(self,id,position,state):
     self.id = id #único a cada arbol para poder identificarlo, en particular el árbol n + 1 que será el origen del incendio
@@ -27,6 +30,15 @@ class Arbol(): #Definimos la clase Arbol
     print("la distancia entre el árbol " + str(self.id) + " y el árbol " + str(otro_arbol.id) + " es " + str(d))
     return d
 
+  def averiguar_probabilidad(self,otro_arbol):
+    def distancia(self, otro_arbol): #método devuelve la distancia entre dos árboles
+      d = (((self.position[0] - otro_arbol.position[0])**2) + ((self.position[1] - otro_arbol.position[1])**2))**(1/2)
+      return d
+
+    p = p_base / distancia(self, otro_arbol)**2
+    print("La probabilidad de transeferencia entre el árbol " + str(self.id) + " y el árbol " + str(otro_arbol.id) + " es de " + str(p))
+    return p
+
 
   def probabilidad(self,otro_arbol): # de los métodos más importantes que vamos a usar, devuelve la probabilidad de que un árbol ENCENDIDO propague su fuego a otro árbol, y lo vuelva ENCENDIDO
 
@@ -34,9 +46,9 @@ class Arbol(): #Definimos la clase Arbol
       d = (((self.position[0] - otro_arbol.position[0])**2) + ((self.position[1] - otro_arbol.position[1])**2))**(1/2)
       return d
 
-    p_base = 0.75
-    p = p_base / distancia(self, otro_arbol)**2
-    print("La probabilidad de transeferencia entre el árbol " + str(self.id) + " y el árbol " + str(otro_arbol.id) + " es de " + str(p))
+    p = p_base / distancia(self, otro_arbol)**3
+    return p
+
 
 def crear_arboles(n): #función para crear árboles y posicionarlos
 
@@ -62,7 +74,59 @@ def crear_arboles(n): #función para crear árboles y posicionarlos
   plt.show() #esto también ^^
   return lista_arboles
 
-x = 300
+
+def iniciar_incendio():
+  copia_bosque = bosque
+  color = []
+  x = []
+  y = []
+
+  muertos = 0
+  encendidos = 0
+
+  for k in range (len(bosque)):
+    if bosque[k].state == 'SUCEPTIBLE':
+      color.append('green')
+    elif bosque[k].state == 'ENCENDIDO':
+      color.append('red')
+    elif bosque[k].state == 'MUERTO':
+      color.append('black')
+
+  for l in range (len(bosque)):
+    x.append(bosque[l].position[0])
+    y.append(bosque[l].position[1])
+
+  for i in range (len(bosque)):
+
+    if bosque[i].state == 'ENCENDIDO':
+     for j in range (len(bosque)):
+      if bosque[j].state == 'SUCEPTIBLE':
+        if bosque[i].probabilidad(bosque[j]) >= random.random():
+          copia_bosque[j].state = 'ENCENDIDO'
+
+        else:
+          True
+      else:
+        True
+    else:
+      True
+
+  plt.scatter(x,y,c=color)
+  plt.show()
+
+  for r in range (len(bosque)):
+    if bosque[r].state == 'ENCENDIDO':
+      encendidos = encendidos + 1
+    
+    elif bosque[r].state == 'MUERTO':
+      muertos = muertos + 1
+
+
+  if muertos == len(bosque) or encendidos == len(bosque):
+    return
+
+  iniciar_incendio()
+  
 
 bosque = crear_arboles(x)
 bosque[0].info()
@@ -70,4 +134,6 @@ bosque[1].info()
 bosque[x].info()
 bosque[0].distancia(bosque[1])
 bosque[0].distancia(bosque[x])
-bosque[0].probabilidad(bosque[x])
+bosque[0].averiguar_probabilidad(bosque[x])
+
+iniciar_incendio()
